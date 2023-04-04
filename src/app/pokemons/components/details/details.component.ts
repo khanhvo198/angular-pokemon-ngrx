@@ -1,13 +1,15 @@
 import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
+import { DetailStore } from './details.store';
 
 @Component({
   selector: 'pokemon-details',
   template: `
+  <ng-container *ngIf="(vm$ | async) as vm">
     <div class="flex gap-4 items-center justify-center">
       <button (click)="prevId()">
         <<
       </button>
-      <pokemon-card [pokemon]="null"></pokemon-card>
+      <pokemon-card [pokemon]="vm.pokemon"></pokemon-card>
       <button (click)="nextId()">
         >>
       </button>
@@ -24,6 +26,7 @@ import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
         Dislike
       </button>
     </div>
+    </ng-container>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [
@@ -31,26 +34,34 @@ import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
       :host {
         height: calc(100% - 5rem);
       }
-    `
-  ]
+    `,
+  ],
+  providers: [DetailStore],
 })
 export class DetailsComponent {
   @HostBinding('class') hostClass =
     'flex flex-col gap-4 items-center justify-center';
 
+  vm$ = this.detailStore.vm$;
+  constructor(private detailStore: DetailStore) {}
+
   nextId() {
     // go to next id
+    this.detailStore.nextIdEffect();
   }
 
   prevId() {
     // go to prev id
+    this.detailStore.prevIdEffect();
   }
 
   like() {
     // like
+    this.detailStore.likeEffect();
   }
 
   dislike() {
     // dislike
+    this.detailStore.dislikeEffect();
   }
 }

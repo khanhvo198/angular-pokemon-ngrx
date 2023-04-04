@@ -3,15 +3,17 @@ import {
   CanActivate,
   CanActivateChild,
   CanLoad,
-  Router
+  Router,
 } from '@angular/router';
-import { of } from 'rxjs';
+import { map, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { AuthStore } from '../stores/auth.store';
 
 @Injectable({ providedIn: 'root' })
 export class AuthenticatedGuard
-  implements CanLoad, CanActivate, CanActivateChild {
-  constructor(private readonly router: Router) {}
+  implements CanLoad, CanActivate, CanActivateChild
+{
+  constructor(private readonly router: Router, private authStore: AuthStore) {}
 
   canLoad() {
     return this.isAuth$();
@@ -26,12 +28,6 @@ export class AuthenticatedGuard
   }
 
   private isAuth$() {
-    return of(false).pipe(
-      tap(isAuth => {
-        if (!isAuth) {
-          this.router.navigate(['/not-auth']);
-        }
-      })
-    );
+    return this.authStore.vm$.pipe(map(({ isLoggedIn }) => isLoggedIn));
   }
 }

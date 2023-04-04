@@ -1,19 +1,25 @@
 import { ChangeDetectionStrategy, Component, VERSION } from '@angular/core';
 import { User } from '../../models/user';
+import { AuthStore } from '../../stores/auth.store';
 
 @Component({
   selector: 'navbar',
   template: `
-    <nav>
-      <h4>Angular Vietnam v{{ version }}</h4>
-      <button *ngIf="isLoggedIn; else notLoggedIn" (click)="logOut()">
-        I am {{ user?.name }}, and I like {{ user?.likes }} and dislike
-        {{ user?.dislikes }} pokemons / Log Out
-      </button>
-      <ng-template #notLoggedIn>
-        <button (click)="logIn()">Log In</button>
-      </ng-template>
-    </nav>
+    
+      <nav>
+        <h4>Angular Vietnam v{{ version }}</h4>
+        <ng-container *ngIf="(vm$ | async) as vm">
+        <button *ngIf="vm.isLoggedIn; else notLoggedIn" (click)="logOut()">
+          I am {{ vm.user?.name }}, and I like {{ vm.user?.likes }} and dislike
+          {{ vm.user?.dislikes }} pokemons / Log Out
+        </button>
+        </ng-container>
+        <ng-template #notLoggedIn>
+          <button (click)="logIn()">Log In</button>
+        </ng-template>
+        
+      </nav>
+    
   `,
   styles: [
     `
@@ -42,22 +48,22 @@ import { User } from '../../models/user';
         font-size: 1rem;
         font-family: 'Source Sans Pro';
       }
-    `
+    `,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NavbarComponent {
   version = VERSION.full;
-  user: User;
-  isLoggedIn = false;
+  vm$ = this.authStore.vm$;
+  constructor(private authStore: AuthStore) {}
 
   logIn() {
     // TODO: Please replace with a service call
-    this.isLoggedIn = true;
+    this.authStore.loginEffect();
   }
 
   logOut() {
     // TODO: Please replace with a service call
-    this.isLoggedIn = false;
+    this.authStore.logoutEffect();
   }
 }
